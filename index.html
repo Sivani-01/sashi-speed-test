@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Typing Analyzer - by Sashi</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --background: #0d1117;
+            --container-bg: #161b22;
+            --accent-glow: #58a6ff;
+            --border-default: #30363d;
+            --font-main: #c9d1d9;
+            --success: #3fb950;
+            --error: #f85149;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--font-main);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .main-layout {
+            display: flex;
+            gap: 25px;
+            width: 95%;
+            max-width: 1200px;
+            align-items: flex-start;
+            padding: 20px;
+        }
+
+        .project-box {
+            background: var(--container-bg);
+            border: 1px solid var(--border-default);
+            padding: 40px;
+            border-radius: 15px;
+            flex: 2;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        }
+
+        .setup-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+
+        .custom-select {
+            background: #21262d;
+            color: white;
+            border: 1px solid var(--border-default);
+            padding: 8px 12px;
+            border-radius: 6px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 10px;
+            background: #21262d;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-glow);
+            box-shadow: 0 0 15px var(--accent-glow);
+            transition: width 0.3s ease;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .stat-box label { font-size: 11px; color: #8b949e; text-transform: uppercase; }
+        .stat-box span { font-size: 26px; font-weight: bold; color: var(--accent-glow); display: block; }
+
+        #display-area {
+            font-size: 1.5rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            padding: 15px;
+            min-height: 100px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 8px;
+            word-wrap: break-word;
+        }
+
+        #display-area span { position: relative; }
+        .success { color: var(--success); }
+        .fail { color: var(--error); background: rgba(248, 81, 73, 0.1); }
+
+        .type-input {
+            width: 100%;
+            height: 100px;
+            background: #0d1117;
+            border: 2px solid var(--border-default);
+            border-radius: 10px;
+            color: white;
+            padding: 15px;
+            font-size: 1.1rem;
+            resize: none;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        .type-input:focus { border-color: var(--accent-glow); }
+
+        .certificate-panel {
+            flex: 1;
+            background: var(--container-bg);
+            border: 3px solid var(--accent-glow);
+            border-radius: 15px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(88, 166, 255, 0.2);
+            display: none;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .name-input {
+            width: 90%;
+            padding: 12px;
+            margin: 15px 0;
+            background: #0d1117;
+            border: 1px solid var(--border-default);
+            color: white;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .btn {
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            transition: opacity 0.2s;
+        }
+
+        .restart-btn { background: #30363d; }
+        .download-btn { background: #238636; width: 100%; }
+        .btn:hover { opacity: 0.8; }
+
+        .footer-credit {
+            margin-top: 25px;
+            border-top: 1px solid var(--border-default);
+            padding-top: 15px;
+            font-size: 14px;
+            color: #8b949e;
+        }
+
+        @media (max-width: 900px) { .main-layout { flex-direction: column; } }
+    </style>
+</head>
+<body>
+
+<div class="main-layout">
+    <div class="project-box">
+        <h2 style="text-align: center; margin-top: 0; color: var(--accent-glow);">Speed Typing Analyzer</h2>
+        
+        <div class="setup-row">
+            <select id="diff-config" class="custom-select">
+                <option value="easy">Easy Level</option>
+                <option value="medium" selected>Level: Medium</option>
+                <option value="hard">Hard Level</option>
+            </select>
+            <select id="time-config" class="custom-select">
+                <option value="30">30 Seconds</option>
+                <option value="60" selected>1 Minute</option>
+            </select>
+        </div>
+
+        <div class="progress-track"><div id="progress-bar-fill" class="progress-fill"></div></div>
+
+        <div class="stats-grid">
+            <div class="stat-box"><label>Timer</label><span id="live-timer">--</span></div>
+            <div class="stat-box"><label>WPM</label><span id="live-wpm">0</span></div>
+            <div class="stat-box"><label>Accuracy</label><span id="live-acc">100%</span></div>
+            <div class="stat-box"><label>Session Best</label><span id="best-wpm">0</span></div>
+        </div>
+
+        <div id="display-area"></div>
+        <textarea id="typing-box" class="type-input" placeholder="Start typing the text above to begin the test..."></textarea>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <div class="footer-credit">
+                Developed by <span style="color: var(--accent-glow); font-weight: bold;">Sashi Poorna Sivani</span>
+            </div>
+            <button class="btn restart-btn" onclick="location.reload()" style="margin-top: 15px;">Reset Session</button>
+        </div>
+    </div>
+
+    <div id="cert-sidebar" class="certificate-panel">
+        <div id="pdf-content">
+            <h3 style="margin-top: 0; color: #58a6ff;">TYPING CERTIFICATE</h3>
+            <p style="font-size: 11px; opacity: 0.8; letter-spacing: 1px;">OFFICIAL PERFORMANCE RECORD</p>
+            <hr style="border: 0; border-top: 1px solid #30363d; margin: 15px 0;">
+            
+            <p style="margin: 5px 0; font-size: 14px;">This certifies that</p>
+            <h2 id="display-name" style="margin: 10px 0; color: #58a6ff;">[Your Name]</h2>
+            
+            <div style="margin: 20px 0; display: inline-block; text-align: left;">
+                <p><strong>SPEED:</strong> <span id="cert-wpm">0</span> WPM</p>
+                <p><strong>ACCURACY:</strong> <span id="cert-acc">0%</span></p>
+                <p><strong>DIFFICULTY:</strong> <span id="cert-diff">MEDIUM</span></p>
+            </div>
+            
+            <div id="signature-area" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 10px; display: none;">
+                <p style="font-size: 12px;">Verified by <strong>Sashi Poorna Sivani's</strong> Analyzer System</p>
+            </div>
+
+            <p style="font-size: 10px; margin-top: 15px;">Issued on: <span id="cert-time"></span></p>
+        </div>
+
+        <input type="text" id="user-name" class="name-input" placeholder="Enter your full name" oninput="updateName(this.value)">
+        <button class="btn download-btn" onclick="downloadPDF()">Download PDF Certificate</button>
+        <button class="btn restart-btn" style="width: 100%; margin-top: 10px;" onclick="location.reload()">Try Again</button>
+    </div>
+</div>
+
+<script>
+    const quotes = {
+        easy: ["The sun is bright.", "Cats like milk.", "The sky is blue.", "I like to code.", "Birds can fly.", "Dogs bark loud.", "Apples are red.", "The moon is up.", "Fish can swim.", "The car is red.", "I love music."],
+        medium: ["Practice makes a man perfect.", "A journey of miles begins here.", "Better late than never to start.", "Consistency is the key to life.", "The early bird catches the worm.", "Knowledge is power for everyone."],
+        hard: ["Linguistic complexity requires processing.", "Quantum mechanics describes particles.", "Microservices architecture decouples.", "Asynchronous programming uses callbacks.", "Recursive functions need a base case."]
+    };
+
+    let timeRemaining, isTestActive = false, timerRef, totalSeconds;
+    let topScore = localStorage.getItem('user_top_wpm') || 0;
+    
+    const displayElement = document.getElementById('display-area');
+    const inputElement = document.getElementById('typing-box');
+    const diffSelect = document.getElementById('diff-config');
+    const timerDisplay = document.getElementById('live-timer');
+    const bestWpmDisplay = document.getElementById('best-wpm');
+
+    bestWpmDisplay.innerText = topScore;
+    timerDisplay.innerText = document.getElementById('time-config').value + 's';
+
+    function updateName(val) {
+        document.getElementById('display-name').innerText = val || "[Your Name]";
+    }
+
+    function loadNewSentence() {
+        const pool = quotes[diffSelect.value];
+        const randomText = pool[Math.floor(Math.random() * pool.length)];
+        displayElement.innerHTML = '';
+        randomText.split('').forEach(char => {
+            const span = document.createElement('span');
+            span.innerText = char;
+            displayElement.appendChild(span);
+        });
+        inputElement.value = '';
+    }
+
+    diffSelect.addEventListener('change', () => { if(!isTestActive) loadNewSentence(); });
+    document.getElementById('time-config').addEventListener('change', (e) => {
+        if(!isTestActive) timerDisplay.innerText = e.target.value + 's';
+    });
+
+    inputElement.addEventListener('input', () => {
+        if(!isTestActive) {
+            startTest();
+        }
+        validate();
+    });
+
+    function startTest() {
+        isTestActive = true;
+        diffSelect.disabled = true;
+        document.getElementById('time-config').disabled = true;
+        totalSeconds = parseInt(document.getElementById('time-config').value);
+        timeRemaining = totalSeconds;
+        
+        timerRef = setInterval(() => {
+            timeRemaining--;
+            timerDisplay.innerText = timeRemaining + 's';
+            document.getElementById('progress-bar-fill').style.width = ((totalSeconds - timeRemaining) / totalSeconds) * 100 + '%';
+            
+            if(timeRemaining <= 0) endTestSession();
+        }, 1000);
+    }
+
+    function validate() {
+        const spans = displayElement.querySelectorAll('span');
+        const entry = inputElement.value.split('');
+        let correct = 0;
+
+        spans.forEach((s, i) => {
+            if(entry[i] == null) s.className = '';
+            else if(entry[i] === s.innerText) { 
+                s.className = 'success'; 
+                correct++; 
+            } else {
+                s.className = 'fail';
+            }
+        });
+
+        let timeElapsedMin = (totalSeconds - timeRemaining) / 60;
+        if (timeElapsedMin <= 0) timeElapsedMin = 0.01;
+        
+        let wpm = Math.round((entry.length / 5) / timeElapsedMin);
+        document.getElementById('live-wpm').innerText = wpm;
+        
+        let acc = entry.length > 0 ? Math.round((correct / entry.length) * 100) : 100;
+        document.getElementById('live-acc').innerText = acc + '%';
+
+        if(entry.length >= spans.length) {
+            loadNewSentence();
+        }
+    }
+
+    function endTestSession() {
+        clearInterval(timerRef);
+        inputElement.disabled = true;
+        isTestActive = false;
+        
+        const finalWpm = document.getElementById('live-wpm').innerText;
+        const finalAcc = document.getElementById('live-acc').innerText;
+
+        if(parseInt(finalWpm) > topScore) {
+            topScore = finalWpm;
+            localStorage.setItem('user_top_wpm', topScore);
+            bestWpmDisplay.innerText = topScore;
+        }
+        
+        document.getElementById('cert-sidebar').style.display = 'block';
+        document.getElementById('cert-wpm').innerText = finalWpm;
+        document.getElementById('cert-acc').innerText = finalAcc;
+        document.getElementById('cert-diff').innerText = diffSelect.value.toUpperCase();
+        document.getElementById('cert-time').innerText = new Date().toLocaleString();
+    }
+
+    function downloadPDF() {
+        const element = document.getElementById('pdf-content');
+        const clone = element.cloneNode(true);
+        
+        clone.style.padding = "50px";
+        clone.style.backgroundColor = "#ffffff";
+        clone.style.color = "#161b22";
+        clone.style.border = "10px double #58a6ff";
+        clone.style.textAlign = "center";
+        clone.style.width = "800px";
+        
+        clone.querySelector('#signature-area').style.display = "block";
+        
+        const opt = {
+            margin: 0.5,
+            filename: 'Typing_Certificate.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, logging: false },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
+        };
+        
+        html2pdf().set(opt).from(clone).save();
+    }
+
+    loadNewSentence();
+</script>
+</body>
+</html>
