@@ -1,0 +1,50 @@
+:root {
+    --bg-color: #f4f7f6;
+    --card-bg: #ffffff;
+    --text-color: #333;
+    --primary: #4a90e2;
+}
+
+body.dark-mode {
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-color: #f4f4f4;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    transition: 0.4s;
+}
+
+.container {
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 800px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.quote-display {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    text-align: left;
+}
+
+.quote-display span {
+    display: inline-block;
+    white-space: pre; /* THIS FIXES THE NO-SPACES BUG */
+}
+
+.correct { color: #2ecc71; }
+.incorrect { color: #e74c3c; background: rgba(231, 76, 60, 0.1); }
+
+.progress-bar-container { width: 100%; height: 8px; background: #eee; margin: 20px 0; }
+.progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width 1s linear; }
+
+.quote-input { width: 100%; height: 100px; padding: 10px; margin: 10px 0; }
